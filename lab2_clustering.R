@@ -6,6 +6,11 @@ library(fpc)
 library(NbClust)
 library(clValid)
 library(optpart)
+
+library("cluster") # Instalar
+library('clusteval') # Instalar
+library('clues') # install.packages("clues")
+
 # Reducir clases
 # Balancear clases
 # Reducir variables
@@ -29,6 +34,9 @@ reClass <- function(x) {
     }
   }))
 }
+
+# cantidad de grupos
+k = 3
 
 # Lectura de archivos
 
@@ -60,7 +68,7 @@ wineRed.dist<-Dist(wineRed.norm,method='euclidian')
 
 wineRed.pam<-pamk(wineRed.norm,krange = 2:50)
 # Cálculos de pam (eclust)
-wineRed.pam<-eclust(wineRed.norm,FUNcluster = 'pam',hc_metric='euclidean',graph = FALSE,k = 3)
+wineRed.pam<-eclust(wineRed.norm,FUNcluster = 'pam',hc_metric='euclidean',graph = FALSE,k)
 
 #optimizacion de silueta
 wineRed.optsil<-optsil(wineRed.pam$clustering,wineRed.dist,100)
@@ -86,7 +94,7 @@ wineWhite.norm<-as.data.frame(scale(wineWhite[,-12]))
 wineWhite.dist<-Dist(wineWhite.norm,method='euclidian')
 
 # Cálculos de pam (eclust)
-wineWhite.pam<-eclust(wineWhite.norm,FUNcluster = 'pam',k=7,hc_metric='euclidean',graph = FALSE)
+wineWhite.pam<-eclust(wineWhite.norm,FUNcluster = 'pam',k,hc_metric='euclidean',graph = FALSE)
 
 # Gráfico de clusters
 
@@ -98,5 +106,13 @@ wineWhite.pam.cluster.stats<-cluster.stats(wineWhite.dist,wineWhite.q,as.vector(
 
 # Matriz de confusión
 table(wineWhite$quality,wineWhite.pam$clustering)
+
+# jaccard
+# estructura de cluster para cluster inicial
+clusterPropuesto <- wineRed$quality
+names(clusterPropuesto) <- rownames(wineRed)
+
+jaccard=round(cluster_similarity(wineRed.pam$clustering,clusterPropuesto, similarity = 'jaccard', method = "independence"),6)
+print(jaccard)
 
 
