@@ -60,7 +60,7 @@ wineRed.dist<-Dist(wineRed.norm,method='euclidian')
 
 wineRed.pam<-pamk(wineRed.norm,krange = 2:50)
 # Cálculos de pam (eclust)
-wineRed.pam<-eclust(wineRed.norm,FUNcluster = 'pam',hc_metric='euclidean',graph = FALSE,k.max=100)
+wineRed.pam<-eclust(wineRed.norm,FUNcluster = 'pam',hc_metric='euclidean',graph = FALSE,k = 3)
 
 #optimizacion de silueta
 wineRed.optsil<-optsil(wineRed.pam$clustering,wineRed.dist,100)
