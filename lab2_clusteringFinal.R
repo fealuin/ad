@@ -9,7 +9,9 @@ library(optpart)
 library(cluster) 
 library(clusteval) 
 library(clues) 
-
+library(gridExtra)
+library(spatstat)
+library(ggfortify)
 
 # Normaliza entre 0 y 1 
 normalize <- function(x) {
@@ -28,6 +30,9 @@ reClass <- function(x) {
     }
   }))
 }
+
+#distancia euclidiana
+euc.dist <- function(x1, x2) sqrt(sum((x1 - x2) ^ 2))
 
 # Cantidad de clusters
 k <- 2
@@ -59,7 +64,7 @@ wineWhite.norm<-as.data.frame(lapply(wineWhite[,-ncol(wineWhite)],normalize))
 ## Determinación de k en base a índice silueta medio
 
 #kmeans
-fviz_nbclust(wineWhite.std, kmeans, method = "silhouette")
+fviz_nbclust(wineWhite.std, kmeans, method = 'silhouette',k.max=20,print.summary = TRUE)
 
 # Cálculo de distancia
 wineWhite.dist<-Dist(wineWhite.std,method=distance)
@@ -74,7 +79,7 @@ fviz_silhouette(wineWhite.clustering)
 ## Métricas de calidad
 
 # Matriz de confusión
-table(wineWhite$quality,wineWhite.clustering$cluster)
+grid.table(table(wineWhite$quality,wineWhite.clustering$cluster),rows=c(1,2))
 
 # Internas
 
@@ -101,3 +106,22 @@ print(jaccard)
 #Otras
 wineWhite.clustering.stats<-cluster.stats(wineWhite.dist,as.vector(wineWhite.clustering$cluster),wineWhite.q)
 
+
+#Centros kmeans
+grid.table(t(format(wineWhite.clustering$centers,digits = 1)))
+
+# Vecinos cercanos
+
+# cluster 1
+cl1.nbs <- head(order(apply(wineWhite.std,1, function(x) euc.dist(as.numeric(x),wineWhite.clustering$centers[1,]))),1)
+
+# cluster 2
+cl2.nbs <- head(order(apply(wineWhite.std,1, function(x) euc.dist(as.numeric(x),wineWhite.clustering$centers[2,]))),1)
+
+c1<-wineWhite[cl1.nbs,]
+c2<-wineWhite[cl2.nbs,]
+
+c1.std<-wineWhite.std[cl1.nbs,]
+c2.std<-wineWhite.std[cl2.nbs,]
+
+write.csv(rbind(c1,c2),file='centroides.txt')
