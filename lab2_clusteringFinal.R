@@ -1,4 +1,4 @@
-library(plotly)
+library(plotly) 
 library(cluster)
 library(amap)
 library(factoextra)
@@ -59,10 +59,10 @@ wineWhite.norm<-as.data.frame(lapply(wineWhite[,-ncol(wineWhite)],normalize))
 ## Determinación de k en base a índice silueta medio
 
 #kmeans
-fviz_nbclust(wineWhite.norm, kmeans, method = "silhouette")
+fviz_nbclust(wineWhite.std, kmeans, method = "silhouette")
 
 # Cálculo de distancia
-wineWhite.dist<-Dist(wineWhite.norm,method=distance)
+wineWhite.dist<-Dist(wineWhite.std,method=distance)
 
 # Cálculos de clúster
 wineWhite.clustering<-eclust(wineWhite.std,FUNcluster = clustFUN,hc_metric=distance,graph = FALSE,k=k)
@@ -77,8 +77,16 @@ fviz_silhouette(wineWhite.clustering)
 table(wineWhite$quality,wineWhite.clustering$cluster)
 
 # Internas
-wineWhite.clustering.stats<-cluster.stats(wineWhite.dist,wineWhite.q,as.vector(wineWhite.clustering$cluster))
 
+# Conectividad
+wineWhite.connectivity<-connectivity(wineWhite.dist,clusters=wineWhite.clustering$cluster,method=distance, neighbSize=10)
+
+# Índice Dunn
+wineWhite.dunn<-dunn(wineWhite.dist,clusters=wineWhite.clustering$cluster,method=distance)
+
+# Índice siulueta 
+
+wineWhite.silhouette<-summary(silhouette(wineWhite.clustering$cluster,dist=wineWhite.dist))
 
 # Externas
   
@@ -88,4 +96,8 @@ clusterPropuesto <- wineWhite$quality
 names(clusterPropuesto) <- rownames(wineWhite)
 jaccard=round(cluster_similarity(wineWhite.clustering$cluster,clusterPropuesto, similarity = 'jaccard', method = "independence"),6)
 print(jaccard)
+
+
+#Otras
+wineWhite.clustering.stats<-cluster.stats(wineWhite.dist,as.vector(wineWhite.clustering$cluster),wineWhite.q)
 
