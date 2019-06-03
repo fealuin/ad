@@ -110,18 +110,20 @@ wineWhite.clustering.stats<-cluster.stats(wineWhite.dist,as.vector(wineWhite.clu
 #Centros kmeans
 grid.table(t(format(wineWhite.clustering$centers,digits = 1)))
 
-# Vecinos cercanos
+# Centroides
+
+ncentroides<-1
 
 # cluster 1
-cl1.nbs <- head(order(apply(wineWhite.std,1, function(x) euc.dist(as.numeric(x),wineWhite.clustering$centers[1,]))),1)
+cl1.nbs <- head(order(apply(wineWhite.std,1, function(x) euc.dist(as.numeric(x),wineWhite.clustering$centers[1,]))),ncentroides)
 
 # cluster 2
-cl2.nbs <- head(order(apply(wineWhite.std,1, function(x) euc.dist(as.numeric(x),wineWhite.clustering$centers[2,]))),1)
+cl2.nbs <- head(order(apply(wineWhite.std,1, function(x) euc.dist(as.numeric(x),wineWhite.clustering$centers[2,]))),ncentroides)
 
-c1<-wineWhite[cl1.nbs,]
-c2<-wineWhite[cl2.nbs,]
+c1<-cbind(cluster=1,wineWhite[cl1.nbs,])
+c2<-cbind(cluster=2,wineWhite[cl2.nbs,])
 
-c1.std<-wineWhite.std[cl1.nbs,]
-c2.std<-wineWhite.std[cl2.nbs,]
+c1.std<-cbind(cluster=1,wineWhite.std[cl1.nbs,],quality=wineWhite$quality[cl1.nbs])
+c2.std<-cbind(cluster=2,wineWhite.std[cl2.nbs,],quality=wineWhite$quality[cl2.nbs])
 
-write.csv(rbind(c1,c2),file='centroides.txt')
+write.csv(rbind(c1.std,c2.std),file='centroides.txt')
