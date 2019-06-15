@@ -50,7 +50,7 @@ wineWhite$quality<-reClass(wineWhite$quality)
 #se elimina clase 2 para distingir solo entre bueno y malo
 
 wineRed<-wineRed[-which(wineRed$quality==2),]
-
+wineWhite<-wineWhite[-which(wineWhite$quality==2),]
 # PAM Vino Rojo
 #seleccion de caracteristicas cortez 2009
 
@@ -59,19 +59,26 @@ wineRed<-wineRed[-which(wineRed$quality==2),]
 wineRed.q<-as.numeric(as.factor(paste0('q' , as.character(wineRed$quality))))
 wineWhite.q<-as.numeric(as.factor(paste0('q' , as.character(wineWhite$quality))))
 
+
+
 # Normalización
 #wineRed.norm<-as.data.frame(lapply(wineRed[,-12],normalize))
 # Estandarización
 wineRed.norm<-as.data.frame(scale(wineRed[,-ncol(wineRed)]))
 #Cálculo de distancia
-wineRed.dist<-Dist(wineRed.norm,method='euclidian')
+wineRed.dist<-Dist(wineRed.norm,method='correlation')
 
 wineRed.pam<-pamk(wineRed.norm,krange = 2:50)
 # Cálculos de pam (eclust)
-wineRed.pam<-eclust(wineRed.norm,FUNcluster = 'pam',hc_metric='euclidean',graph = FALSE,k)
+wineRed.pam<-eclust(wineRed.norm,FUNcluster = 'pam',hc_metric='euclidean',graph = FALSE,k=4)
+
+fviz_nbclust(wineRed.norm,FUNcluster=clara,method='silhouette',k.max=10,diss = wineRed.dist,verbose = TRUE)
 
 #optimizacion de silueta
 wineRed.optsil<-optsil(wineRed.pam$clustering,wineRed.dist,100)
+wineRed.pam.clValid<-clValid(wineRed.norm, 2:10,clMethods = c('kmeans','pam'),validation = 'stability',metric = 'correlation')
+
+plot(wineRed.pam.clValid)
 
 # Gráfico de clusters
 
@@ -82,22 +89,25 @@ fviz_silhouette(wineRed.pam)
 wineRed.pam.cluster.stats<-cluster.stats(wineRed.dist,wineRed.q,as.vector(wineRed.pam$clustering))
 
 # Matriz de confusión
-table(wineRed$quality,wineRed.pam$clustering)
+table(wineRed$quality,wineRed.pam$cluster)
 
 ## PAM Vino Blanco 
 
 # Normalización
-wineWhite.norm<-as.data.frame(lapply(wineWhite[,-12],normalize))
+#wineWhite.norm<-as.data.frame(lapply(wineWhite[,-12],normalize))
 # Estandarización
 wineWhite.norm<-as.data.frame(scale(wineWhite[,-12]))
 #Cálculo de distancia
-wineWhite.dist<-Dist(wineWhite.norm,method='euclidian')
+wineWhite.dist<-Dist(wineWhite.norm,method='correlation')
 
 # Cálculos de pam (eclust)
 wineWhite.pam<-eclust(wineWhite.norm,FUNcluster = 'pam',k,hc_metric='euclidean',graph = FALSE)
 
-# Gráfico de clusters
 
+
+
+# Gráfico de clusters
+fviz_nbclust(wineWhite.norm,FUNcluster=kmeans,method='silhouette',k.max=10,diss = wineWhite.dist,verbose = TRUE)
 fviz_cluster(wineWhite.pam,geom='point',show.clust.cent = TRUE,ggtheme = theme_minimal(),ellipse.type = 'norm')
 fviz_silhouette(wineWhite.pam)
 
