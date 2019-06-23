@@ -17,7 +17,7 @@ reClass <- function(x) {
     }
   }))
 }
-wineWhite$quality<-reClass(wineWhite$quality)
+wineWhite$quality<-factor(reClass(wineWhite$quality))
 
 #ejemplo de https://stats.idre.ucla.edu/r/dae/logit-regression/
 
@@ -43,13 +43,15 @@ logLik(reg)
 varImp(reg)
 
 # K Fold
-
+set.seed(1)
+Train <- createDataPartition(wineWhite$quality, p=0.6, list=FALSE)
+training <- wineWhite[ Train, ]
+testing <- wineWhite[ -Train, ]
 
 ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
 
-mod_fit <- train(Class ~ Age + ForeignWorker + Property.RealEstate + Housing.Own + 
-                   CreditHistory.Critical,  data=GermanCredit, method="glm", family="binomial",
+mod_fit <- train(quality~fixed.acidity+volatile.acidity+citric.acid+residual.sugar+chlorides+free.sulfur.dioxide+total.sulfur.dioxide+density+ pH+sulphates+alcohol,  data=training, method="glm", family="binomial",
                  trControl = ctrl, tuneLength = 5)
 
 pred = predict(mod_fit, newdata=testing)
-confusionMatrix(data=pred, testing$Class)
+confusionMatrix(data=pred, testing$quality)
