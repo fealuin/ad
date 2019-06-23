@@ -1,5 +1,9 @@
 library(aod)
 library(ggplot2)
+library(caret)
+library(survey)
+library(lmtest)
+library(pROC)
 
 wineWhite<-read.csv('./datasets/winequality-white.csv',sep=';')
 reClass <- function(x) {
@@ -26,5 +30,26 @@ with(reg, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F
 #Odds Ratio
 exp(coef(reg))
 
+#Coefficients
+reg$coefficients
 
+#Predict
+plot()
+predict(reg,newdata=wineWhite)
+#Significancia
 logLik(reg)
+
+#Importancia de variables
+varImp(reg)
+
+# K Fold
+
+
+ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
+
+mod_fit <- train(Class ~ Age + ForeignWorker + Property.RealEstate + Housing.Own + 
+                   CreditHistory.Critical,  data=GermanCredit, method="glm", family="binomial",
+                 trControl = ctrl, tuneLength = 5)
+
+pred = predict(mod_fit, newdata=testing)
+confusionMatrix(data=pred, testing$Class)
