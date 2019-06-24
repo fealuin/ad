@@ -2,9 +2,8 @@ library(aod)
 library(ggplot2)
 library(caret)
 library(survey)
-library(lmtest)
 library(pROC)
-library(precrec)
+
 
 wineWhite<-read.csv('./datasets/winequality-white.csv',sep=';')
 reClass <- function(x) {
