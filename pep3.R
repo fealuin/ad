@@ -16,3 +16,8 @@ discretizeDF(data,breaks=10,methods='frecuency')
 rules<-apriori(data,parameter = list(support=0.01,confidence=0.01,minlen=2),appearance=list(rhs=c('class=bad')))
 
 data.pca <- prcomp(data[,-21], center = TRUE,scale. = TRUE)
+
+
+prueba1=kruskal.test( credit_usage ~ class, data = data)
+pvalue = prueba1$p.value
+print(pvalue)
