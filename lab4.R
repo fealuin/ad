@@ -3,6 +3,7 @@ library(ggplot2)
 library(caret)
 library(survey)
 library(pROC)
+library(lmtest)
 
 
 wineWhite<-read.csv('./datasets/winequality-white.csv',sep=';')
@@ -43,7 +44,7 @@ with(reg, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F
 exp(coef(reg))
 
 # Coefficients
-reg$coefficients
+summary(reg)
 
 # Significancia
 logLik(reg)
@@ -59,9 +60,11 @@ anova(reg,test='Chisq')
 
 # ROC
 prob<-predict(reg,type=c('response'))
-f1 = roc(quality ~ prob, data=wineWhite.std) 
+f1 <- roc(quality ~ prob, data=wineWhite.std) 
 plot(f1, col="red")
 
+# p-value modelo
+lrtest(reg)
 
 # Validación cruzada K Fold 
 set.seed(1)
