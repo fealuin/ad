@@ -6,6 +6,9 @@ library(arulesViz)
 
 
 data=readARFF("./datasets/credit_fruad.arff")
+#data.numeric=read.fwf('./datasets/german.data-numeric',widths = rep(4,25))
+data.numeric=read.csv('./datasets/proc_german_num_02 withheader-2.tab.tsv',sep = '\t')
+
 D<-daisy(data[,-21],metric='gower')
 mds<-as.data.frame(cmdscale(D))
 names(mds)<-c('x','y')
