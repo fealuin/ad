@@ -39,9 +39,12 @@ data.dis[,toDis] <-discretizeDF(data[,toDis])
 data.dis[,toFactor]<-data.frame(as.factor(data$location),as.factor(data$residence_since),as.factor(data$existing_credits),as.factor(data$num_dependents))
 
 
-rules<-apriori(data,parameter = list(support=0.01,confidence=0.01,minlen=2),appearance=list(rhs=c('class=bad')))
+rules<-apriori(data.dis,parameter = list(support=0.02,confidence=0.8,minlen=2),appearance=list(rhs=c('class=bad')))
 
-data.pca <- prcomp(data[,-21], center = TRUE,scale. = TRUE)
+inspect(head(rules,10,by='lift'))
+
+p<-plot(rules)
+p<-plot(head(rules,10,by='lift'),method='paracoord',reorder=T)
 
 
 prueba1=kruskal.test( credit_usage ~ class, data = data)
