@@ -47,6 +47,7 @@ p<-plot(rules)
 p<-plot(head(rules,10,by='lift'),method='paracoord',reorder=T)
 
 
-prueba1=kruskal.test( credit_usage ~ class, data = data)
+
+prueba1=kruskal.test( class~credit_usage*current_balance   , data = data)
 pvalue = prueba1$p.value
 print(pvalue)
