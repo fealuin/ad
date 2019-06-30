@@ -34,13 +34,17 @@ toFactor<-c(
 
 data.dis<-data
 
-# numeric
 
-data.numeric<-lapply(data, as.numeric)
 
 data.dis[,toDis] <-discretizeDF(data[,toDis])
 data.dis[,toFactor]<-data.frame(as.factor(data$location),as.factor(data$residence_since),as.factor(data$existing_credits),as.factor(data$num_dependents))
 
+
+# numeric
+
+data.numeric<-as.data.frame(lapply(data, as.numeric))
+
+# rules
 
 rules<-apriori(data.dis,parameter = list(support=0.02,confidence=0.8,minlen=2),appearance=list(rhs=c('class=bad')))
 
