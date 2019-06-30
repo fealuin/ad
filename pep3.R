@@ -7,9 +7,9 @@ library(arulesViz)
 
 data=readARFF("./datasets/credit_fruad.arff")
 #data.numeric=read.fwf('./datasets/german.data-numeric',widths = rep(4,25))
-data.numeric=read.csv('./datasets/proc_german_num_02 withheader-2.tab.tsv',sep = '\t')
+#data.numeric=read.csv('./datasets/proc_german_num_02 withheader-2.tab.tsv',sep = '\t')
 
-D<-daisy(data[,-21],metric='gower')
+#D<-daisy(data[,-21],metric='gower')
 
 
 #mds<-as.data.frame(cmdscale(D))
@@ -17,6 +17,7 @@ D<-daisy(data[,-21],metric='gower')
 #plot_ly(data=mds,x=~x,y=~y,type = 'scatter',color=data[,21])
 
 #discretizeDF(data.numeric)
+
 
 #Discretize
 toDis<-c(
@@ -33,7 +34,9 @@ toFactor<-c(
 
 data.dis<-data
 
+# numeric
 
+data.numeric<-lapply(data, as.numeric)
 
 data.dis[,toDis] <-discretizeDF(data[,toDis])
 data.dis[,toFactor]<-data.frame(as.factor(data$location),as.factor(data$residence_since),as.factor(data$existing_credits),as.factor(data$num_dependents))
@@ -48,6 +51,6 @@ p<-plot(head(rules,10,by='lift'),method='paracoord',reorder=T)
 
 
 
-prueba1=kruskal.test( class~credit_usage*current_balance   , data = data)
+prueba1=kruskal.test( current_balance~class  , data = data)
 pvalue = prueba1$p.value
 print(pvalue)
