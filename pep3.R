@@ -3,9 +3,9 @@ library(cluster)
 library(plotly)
 library(arules)
 library(arulesViz)
-library(corrplot)
-library(corrr)
-library(ggplot2)
+
+
+
 
 data=readARFF("./datasets/credit_fruad.arff")
 #data.numeric=read.fwf('./datasets/german.data-numeric',widths = rep(4,25))
@@ -48,14 +48,10 @@ data.numeric<-as.data.frame(lapply(data, as.numeric))
 
 # correlation
 
-corrplot(cor(data.numeric))
+data.cor<-as.data.frame(cor(data.numeric))
+class.cor<-as.data.frame(t(data.cor['class',]))
 
-x <- data.numeric %>% 
-  correlate() %>% 
-  focus(class)
-x<-as.data.frame(x[order(x$class),])
-
-plot_ly(x,x=~rowname,y=~class,type='bar')
+plot_ly(class.cor,x=row.names(class.cor),y=~class,type='bar')
 
 # variance
 
@@ -70,8 +66,5 @@ inspect(head(rules,10,by='lift'))
 p<-plot(rules)
 p<-plot(head(rules,10,by='lift'),method='paracoord',reorder=T)
 
+data.kruskal=as.data.frame(lapply(data.numeric,function(x) kruskal.test(x~class,data=data.numeric)$p.value))
 
-
-prueba1=kruskal.test( current_balance~class  , data = data)
-pvalue = prueba1$p.value
-print(pvalue)
