@@ -48,11 +48,18 @@ data.numeric<-as.data.frame(lapply(data, as.numeric))
 
 # correlation
 
-data.cor<-as.data.frame(cor(data.numeric))
+data.cor<-as.data.frame(cor(data.numeric))[,-21]
 class.cor<-as.data.frame(t(data.cor['class',]),stringsAsFactors = F)
-class.cor$names<-row.names(class.cor)
-class.cor<-class.cor[order(class.cor$class),]
-plot_ly(class.cor,x=~names,y=~class,type='bar')
+class.cor$names<-factor(row.names(class.cor),levels = row.names(class.cor)[order(class.cor$class)])
+
+plot_ly(class.cor,x=~class,y=~names,type='bar',orientation='h') %>%
+  layout(
+    yaxis=list(
+      title='Variables'
+      ),
+    xaxis=list(
+      title='Correlación con clase'
+    ))
 
 # variance
 
