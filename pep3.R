@@ -3,7 +3,9 @@ library(cluster)
 library(plotly)
 library(arules)
 library(arulesViz)
-
+library(corrplot)
+library(corrr)
+library(ggplot2)
 
 data=readARFF("./datasets/credit_fruad.arff")
 #data.numeric=read.fwf('./datasets/german.data-numeric',widths = rep(4,25))
@@ -43,6 +45,21 @@ data.dis[,toFactor]<-data.frame(as.factor(data$location),as.factor(data$residenc
 # numeric
 
 data.numeric<-as.data.frame(lapply(data, as.numeric))
+
+# correlation
+
+corrplot(cor(data.numeric))
+
+x <- data.numeric %>% 
+  correlate() %>% 
+  focus(class)
+x<-as.data.frame(x[order(x$class),])
+
+plot_ly(x,x=~rowname,y=~class,type='bar')
+
+# variance
+
+data.var<-as.data.frame(lapply(data.numeric, var))
 
 # rules
 
