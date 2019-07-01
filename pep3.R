@@ -49,9 +49,10 @@ data.numeric<-as.data.frame(lapply(data, as.numeric))
 # correlation
 
 data.cor<-as.data.frame(cor(data.numeric))
-class.cor<-as.data.frame(t(data.cor['class',]))
-
-plot_ly(class.cor,x=row.names(class.cor),y=~class,type='bar')
+class.cor<-as.data.frame(t(data.cor['class',]),stringsAsFactors = F)
+class.cor$names<-row.names(class.cor)
+class.cor<-class.cor[order(class.cor$class),]
+plot_ly(class.cor,x=~names,y=~class,type='bar')
 
 # variance
 
