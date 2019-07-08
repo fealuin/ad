@@ -10,7 +10,10 @@ library(survey)
 library(pROC)
 library(lmtest)
 library(precrec)
-
+library(randomForest)
+library(InformationValue)
+library(pROC)
+library( mboost)
 
 data=readARFF("./datasets/credit_fruad.arff")
 #data.numeric=read.fwf('./datasets/german.data-numeric',widths = rep(4,25))
@@ -41,14 +44,14 @@ toFactor<-c(
   'num_dependents'
   )
 
-data.dis<-as.data.frame(apply(data,2,function(x) gsub('\\s+', '.',x)))
+data.dis<-as.data.frame(apply(data,2,function(x) make.names(gsub("[[:punct:]]", " ", x)) ))
 
 
 
 data.dis[,toDis] <-discretizeDF(data[,toDis])
 data.dis[,toFactor]<-data.frame(as.factor(data$location),as.factor(data$residence_since),as.factor(data$existing_credits),as.factor(data$num_dependents))
 
-
+data.dis<-as.data.frame(apply(data.dis,2,function(x) make.names(gsub("[[:punct:]]", " ", x)) ))
 
 set.seed(1)
 
@@ -106,9 +109,9 @@ lrtest(reg)
 # Se predice la calidad del set de pruebas
 pred = predict(reg, newdata=testing,type='response')
 
-library(InformationValue)
+
 optCutOff <- optimalCutoff(testing$class, pred)[1]
-pred.num<-as.factor(as.numeric(pred>optCutOff))
+pred.num<-as.factor(make.names(as.numeric(pred>optCutOff)))
 
 # Se evalúa el resultado del clasificador
 caret::confusionMatrix(data=pred.num, as.factor(testing$class))
@@ -119,7 +122,7 @@ plotROC(testing$class, as.numeric(pred.num))
 ## Validación cruzada K Fold 
 
 # Se define el numero de folds
-ctrl <- trainControl(method = "repeatedcv", savePredictions = TRUE,number=25,classProbs=T)
+ctrl <- trainControl(method = "repeatedcv", savePredictions = TRUE,number=10,classProbs=T)
 
 # Se entrena el modelo de regresión
 reg <- train(class ~ over_draft + credit_usage + credit_history + Average_Credit_Balance + 
@@ -127,10 +130,32 @@ reg <- train(class ~ over_draft + credit_usage + credit_history + Average_Credit
                    personal_status,  data=data.dis, method="glm",family=binomial, trControl = ctrl)
 # Se predice la calidad del set de pruebas
 pred = predict(reg, newdata=testing)
-pred.num<-as.factor(as.numeric(pred>optCutOff))
+#pred.num<-as.factor(make.names(as.numeric(pred>optCutOff)))
 # Se evalúa el resultado del clasificador
 caret::confusionMatrix(data=pred,testing$class)
 
-# Accuracy
-mean(pred!=)
+pred.roc<-pROC::roc(as.numeric(testing$class), as.numeric(pred))
+pred.auc<-pROC::auc(pred.roc)
 
+
+plot.roc(pred.roc,print.auc = T)
+
+
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 5,
+                           repeats = 10,
+                           ## Estimate class probabilities
+                           classProbs = TRUE,
+                           ## Evaluate performance using 
+                           ## the following function
+                           summaryFunction = twoClassSummary)
+
+
+glmBoostModel <- train(class ~ ., data=training, method = "glmboost", metric="ROC", trControl = fitControl, tuneLength=5, center=TRUE, family=binomial(link = c("logit")))
+
+
+
+
+#test random forest
+rf<-randomForest(class~.,data=data.dis)
+rf$importance[order(rf$importance[,1]),]
